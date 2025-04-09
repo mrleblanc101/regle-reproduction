@@ -2,20 +2,27 @@
 import Drawer from '@/components/Drawer.vue'
 import JSONViewer from '@/components/JSONViewer.vue'
 import { useRegle } from '@regle/core'
-import { applyIf, minLength, required } from '@regle/rules'
+import { required, ipAddress as ipv4Address, integer, between } from '@regle/rules';
 import { ref } from 'vue'
+import type { Ref } from 'vue'
 
-const condition = ref(true)
+type Trap = {
+    id?: number;
+    address: string;
+    port: number | null;
+};
 
-const { r$ } = useRegle(
-  { name: '' },
-  {
-    name: {
-      required: applyIf(condition, required),
-      minLength: applyIf(condition, minLength(3)),
-    },
-  },
-)
+const form: Ref<Trap> = ref({
+    address: '',
+    port: 162,
+});
+
+const rules = ref({
+    address: { ipv4Address, required },
+    port: { required, integer, between: between(0, 65_535) }, // TODO: Validate min/max value (1, 65,535)
+});
+
+const { r$ } = useRegle(form, rules);
 </script>
 
 <template>
